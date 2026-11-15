@@ -1,5 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:portal_cliente/screens/home_screen.dart';
+import 'package:portal_cliente/styles/app_styles.dart';
 
 void main() {
   if (kReleaseMode) {
@@ -18,8 +20,6 @@ class MainApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      home: Scaffold(body: Center(child: Text('Hello World!'))),
-    );
+    return MaterialApp(theme: AppStyles.appTheme, home: const HomeScreen());
   }
 }
