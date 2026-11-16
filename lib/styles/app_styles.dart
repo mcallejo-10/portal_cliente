@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 
-/// FacturIA Design System
-/// Implementation of the 60-30-10 color rule with Sarabun typography
 class AppStyles {
   // ==================== COLORS ====================
 
@@ -33,6 +31,13 @@ class AppStyles {
   /// Dividers & Borders
   static const Color dividerColor = Color(0xFFE5E7EB);
   static const Color borderColor = Color(0xFFD1D5DB);
+
+  /// Icon Colors
+  static const Color iconPrimary = Color(0xFF000000);
+  static const Color iconSecondary = Color(0xFF6B7280);
+  static const Color iconDisabled = Color(0xFF9CA3AF);
+  static const Color iconActive = Color(0xFF1461DC);
+  static const Color iconBackground = Color.fromARGB(50, 20, 97, 220);
 
   // ==================== TYPOGRAPHY ====================
 
@@ -208,6 +213,16 @@ class AppStyles {
     ],
   );
 
+  // ==================== ICON STYLES ====================
+  /// Icon Size
+  static const double iconSize = 28;
+
+  /// Icon Button Padding
+  static const double iconButtonPaddingVertical = 6;
+  static const double iconButtonPaddingHorizontal = 20;
+  static const double iconBottomBarBorderRadius = 24;
+  static const double iconBorderRadius = 24;
+
   // ==================== INPUT FIELD STYLES ====================
 
   static const double inputBorderRadius = 8;
@@ -319,8 +334,13 @@ class AppStyles {
       ),
       navigationBarTheme: NavigationBarThemeData(
         backgroundColor: surfaceWhite,
-        labelTextStyle: WidgetStatePropertyAll(captionStyle),
-        indicatorColor: primaryColor,
+        labelTextStyle: WidgetStateProperty.resolveWith((states) {
+          final color = states.contains(WidgetState.selected)
+              ? iconActive
+              : iconSecondary;
+          return captionStyle.copyWith(color: color);
+        }),
+        indicatorColor: iconBackground,
         elevation: cardElevation,
       ),
     );

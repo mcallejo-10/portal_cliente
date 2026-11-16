@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:material_symbols_icons/symbols.dart';
+import 'package:portal_cliente/widgets/navigation_destination.dart';
 
 import 'client_profile_screen.dart';
 import 'documents_list_screen.dart';
@@ -38,16 +40,19 @@ class HomeScreenState extends State<HomeScreen> {
             setState(() {});
           },
           destinations: [
-            NavigationDestination(
-              icon: Icon(Icons.home_outlined),
+            Navigation(
+              icon: Symbols.home,
+              selected: selectedIndex == 0,
               label: "Home",
             ),
-            NavigationDestination(
-              icon: Icon(Icons.description_outlined),
+            Navigation(
+              icon: Symbols.description,
+              selected: selectedIndex == 1,
               label: "Documentos",
             ),
-            NavigationDestination(
-              icon: Icon(Icons.person_outline),
+            Navigation(
+              icon: Symbols.person,
+              selected: selectedIndex == 2,
               label: "Perfil",
             ),
           ],
