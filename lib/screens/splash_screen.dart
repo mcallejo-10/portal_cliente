@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:portal_cliente/screens/home_screen.dart';
+//import 'package:portal_cliente/screens/home_screen.dart';
+import 'package:portal_cliente/screens/login_screen.dart';
 import 'package:portal_cliente/styles/app_styles.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -45,7 +46,7 @@ class _SplashScreenState extends State<SplashScreen> {
     await Future.delayed(Duration(seconds: 2));
     Navigator.pushReplacement(
       context,
-      MaterialPageRoute(builder: (context) => const HomeScreen()),
+      MaterialPageRoute(builder: (context) => const LoginScreen()),
     );
 
     setState(() {});
