@@ -77,6 +77,14 @@ class AppStyles {
     color: textPrimary,
   );
 
+  static const TextStyle headingSmall = TextStyle(
+    fontFamily: fontFamily,
+    fontSize: 16,
+    fontWeight: FontWeight.w700,
+    height: 1.35,
+    color: textPrimary,
+  );
+
   static const TextStyle subheadingStyle = TextStyle(
     fontFamily: fontFamily,
     fontSize: 18,
@@ -90,7 +98,7 @@ class AppStyles {
     fontSize: 16,
     fontWeight: FontWeight.w600,
     height: 1.4,
-    color: textPrimary,
+    color: textTertiary,
   );
 
   static const TextStyle bodyStyle = TextStyle(

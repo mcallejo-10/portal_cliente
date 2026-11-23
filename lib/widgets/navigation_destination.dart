@@ -21,8 +21,6 @@ class _NavigationState extends State<Navigation> {
   @override
   NavigationDestination build(BuildContext context) {
     final label = widget.label;
-    final selected = widget.selected;
-
     return NavigationDestination(
       icon: Icon(
         widget.icon,
