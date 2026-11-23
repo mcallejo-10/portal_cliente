@@ -1,6 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:portal_cliente/screens/home_screen.dart';
+import 'package:portal_cliente/screens/splash_screen.dart';
 import 'package:portal_cliente/styles/app_styles.dart';
 
 void main() {
@@ -20,6 +20,6 @@ class MainApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(theme: AppStyles.appTheme, home: const HomeScreen());
+    return MaterialApp(theme: AppStyles.appTheme, home: const SplashScreen());
   }
 }

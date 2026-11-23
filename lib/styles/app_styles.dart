@@ -231,6 +231,13 @@ class AppStyles {
   static const double iconBottomBarBorderRadius = 24;
   static const double iconBorderRadius = 24;
 
+  // ==================== IMAGE STYLES ====================
+
+  static const double appBarLogoHeight = 50;
+  static const double appBarLogoWidth = 50;
+  static const double splashScreenLogoHeight = 180;
+  static const double splashScreenLogoWidth = 180;
+
   // ==================== INPUT FIELD STYLES ====================
 
   static const double inputBorderRadius = 8;

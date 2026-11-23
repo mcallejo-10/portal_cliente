@@ -19,8 +19,8 @@ class MainScreenState extends State<MainScreen> {
           children: [
             Image(
               image: AssetImage('assets/logo_Daniel.png'),
-              width: 50,
-              height: 50,
+              height: AppStyles.appBarLogoHeight,
+              width: AppStyles.appBarLogoWidth,
             ),
             SizedBox(width: 8),
             Column(
