@@ -1,8 +1,9 @@
 # Contrato de la API — Portal Cliente
 
-**Estado:** Fase 0 y Fase 1 implementadas (`ping`, `registerClient`, `getProfile`).
-Los endpoints marcados como **(borrador)** todavía no están implementados y sus
-campos pueden cambiar al llegar su fase.
+**Estado:** Fases 0, 1, 2 y 3 implementadas (`ping`, `registerClient`,
+`getProfile`, `getInvoices`, `getInvoice`, `getInvoiceFile`, `uploadInvoice`,
+`getUploadStatus`). Los endpoints marcados como **(borrador)** todavía no están
+implementados y sus campos pueden cambiar al llegar su fase.
 
 **Versión de API:** `1`
 
@@ -80,10 +81,10 @@ alcance sigue siendo `docs/PLAN_PORTAL_CLIENTE_API.md`.
 | `NOT_FOUND` | Recurso inexistente o ajeno. No revela existencia de datos de otros clientes. |
 | `VALIDATION_ERROR` | Petición mal formada o campos obligatorios ausentes. |
 | `RATE_LIMITED` | Demasiados intentos o solicitud en curso. Reintentar más tarde. |
-| `DUPLICATE` | Documento ya subido (borrador, Fase 3). |
-| `FILE_TOO_LARGE` | Archivo por encima del límite (borrador, Fase 3). |
-| `UNSUPPORTED_MEDIA_TYPE` | MIME no permitido (borrador, Fase 3). |
-| `CLIENT_FOLDER_NOT_READY` | El cliente no tiene INBOX disponible (borrador, Fase 3). |
+| `DUPLICATE` | Documento ya subido (Fase 3). |
+| `FILE_TOO_LARGE` | Archivo por encima del límite (Fase 3). |
+| `UNSUPPORTED_MEDIA_TYPE` | MIME no permitido (Fase 3). |
+| `CLIENT_FOLDER_NOT_READY` | El cliente no tiene INBOX disponible (Fase 3). |
 | `INTERNAL_ERROR` | Error del servidor. Mostrar mensaje genérico y usar `requestId`. |
 
 Ante `AUTH_INVALID`/`AUTH_EXPIRED`: renovar el token una vez y reintentar. Ante
@@ -215,12 +216,13 @@ Errores habituales: `AUTH_REQUIRED`, `AUTH_INVALID`, `AUTH_EXPIRED`,
 
 ---
 
-## 5. Endpoints previstos (borrador)
+## 5. Consulta de facturas y endpoints previstos
 
-Estos contratos se basan en el plan y todavía **no están implementados**. No
-construyas la UI definitiva sobre ellos sin revisarlos al abrir su fase.
+`getInvoices`, `getInvoice` y `getInvoiceFile` están implementados (Fase 2),
+así como `uploadInvoice` y `getUploadStatus` (Fase 3). Los endpoints de Fase 4
+siguen marcados como **(borrador)**.
 
-### 5.1 `getInvoices` (Fase 2)
+### 5.1 `getInvoices` (Fase 2 — implementado)
 
 **Petición `data`**
 
@@ -268,7 +270,7 @@ construyas la UI definitiva sobre ellos sin revisarlos al abrir su fase.
 }
 ```
 
-### 5.2 `getInvoice` (Fase 2)
+### 5.2 `getInvoice` (Fase 2 — implementado)
 
 **Petición `data`:** `{ "invoiceId": "1AbC..." }`
 
@@ -296,7 +298,7 @@ detalle y revisión:
 
 Facturas de otro cliente responden `NOT_FOUND`, no `FORBIDDEN`.
 
-### 5.3 `getInvoiceFile` (Fase 2)
+### 5.3 `getInvoiceFile` (Fase 2 — implementado)
 
 **Petición `data`:** `{ "invoiceId": "1AbC..." }`
 
@@ -305,7 +307,7 @@ Facturas de otro cliente responden `NOT_FOUND`, no `FORBIDDEN`.
 Nota: Base64 aumenta el tamaño ~33 %. La app debe comprimir imágenes y mostrar
 estados de carga.
 
-### 5.4 `uploadInvoice` (Fase 3)
+### 5.4 `uploadInvoice` (Fase 3 — implementado)
 
 **Petición `data`:**
 
@@ -317,14 +319,20 @@ estados de carga.
 }
 ```
 
-Límite de configuración: `PORTAL_MAX_UPLOAD_MB` (10 MB, ~13 MB en Base64).
+Límite de configuración: `PORTAL_MAX_UPLOAD_MB` (10 MB, ~13 MB en Base64). El
+servidor valida que el MIME esté permitido, que la cabecera real del archivo
+coincida (PDF, JPEG o PNG) y que la extensión sea coherente. El nombre se sanea
+y el archivo se guarda como `PORTAL_<YYYYMMDD_HHmmss>_<nombre>.<ext>`. Los
+duplicados se detectan por MD5 contra `PORTAL_UPLOADS` y `LOG_PROCESO` (el
+pipeline de FacturIA usa MD5).
 
 **Respuesta `data`:** `{ "uploadId": "uuid", "fileId": "1AbC..." }`
 
 Errores: `VALIDATION_ERROR`, `UNSUPPORTED_MEDIA_TYPE`, `FILE_TOO_LARGE`,
-`DUPLICATE`, `CLIENT_FOLDER_NOT_READY`, `RATE_LIMITED`.
+`DUPLICATE`, `CLIENT_FOLDER_NOT_READY`, `RATE_LIMITED`. Ante `DUPLICATE` se
+registra una fila en `PORTAL_UPLOADS` con `ESTADO=DUPLICADO`.
 
-### 5.5 `getUploadStatus` (Fase 3)
+### 5.5 `getUploadStatus` (Fase 3 — implementado)
 
 **Petición `data`:** `{ "uploadId": "uuid" }`
 
@@ -342,6 +350,7 @@ Errores: `VALIDATION_ERROR`, `UNSUPPORTED_MEDIA_TYPE`, `FILE_TOO_LARGE`,
 
 Estados: `EN_COLA`, `PROCESANDO`, `REVISION`, `PROCESADO`, `ERROR`, `DUPLICADO`.
 El estado se deriva en el servidor; la app puede hacer polling cada 3 segundos.
+Las subidas de otro cliente responden `NOT_FOUND`.
 
 ### 5.6 `getDashboard` (Fase 4, pendiente de Daniel)
 
@@ -378,7 +387,8 @@ El estado se deriva en el servidor; la app puede hacer polling cada 3 segundos.
 
 `confirmed` solo incluye `REVISADO` (comparable con el libro registro);
 `provisional` es el resto, excluido `NO_FACTURA`. La definición fiscal definitiva
-está pendiente de validación.
+está pendiente de validación. Mientras tanto, `aeatStatus` es un valor **mockeado**
+en `PORTAL_USERS.AEAT_ESTADO`: no se deriva de `FACTURAS` ni de `CLIENTS_REGISTRY`.
 
 ---
 
@@ -561,9 +571,10 @@ class PingResult {
 
 ---
 
-## 7. Modelos Dart previstos (borrador — Fases 2–4)
+## 7. Modelos Dart de facturas (Fase 2) y previstos (Fases 3–4)
 
-No los des por definitivos hasta que su endpoint esté implementado.
+Los modelos de consulta y de subida de facturas son estables. Los del dashboard
+(Fase 4) siguen siendo borrador.
 
 ```dart
 enum InvoiceType { emitida, recibida, ticket, unknown }
@@ -715,6 +726,8 @@ class UploadStatusResult {
 - Guarda la sesión con `flutter_secure_storage`; nunca guardes el token en logs.
 - Sigue la redirección 302 del Web App; valida el JSON, no el código HTTP.
 - Para subidas, comprime imágenes y contempla el límite de 10 MB (Base64 ~13 MB).
+- Tras `uploadInvoice`, consulta `getUploadStatus` cada 3 s y detén el polling en
+  `PROCESADO`, `ERROR` o `DUPLICADO`.
 - No envíes `uid`, `nif` ni `email` como identidad: el servidor solo confía en el
   token verificado.
 

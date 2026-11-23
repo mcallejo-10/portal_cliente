@@ -1,7 +1,5 @@
 import 'api_response.dart';
 
-// Borrador de la Fase 2-3 del contrato: revisar al implementar cada endpoint.
-
 enum InvoiceType { emitida, recibida, ticket, unknown }
 
 enum InvoiceStatus { revisado, revisionNeeded, noFactura, ok, unknown }
