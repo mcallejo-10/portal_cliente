@@ -10,11 +10,12 @@ class AppStyles {
 
   /// Neutral Background (60%)
   static const Color backgroundLight = Color(0xFFF5F6FA);
-  static const Color backgroundDefault = Color(0xFFFAFAFA);
+  static const Color backgroundDefault = Color.fromARGB(255, 248, 246, 246);
 
   /// Surfaces & Cards (30%)
   static const Color surfaceWhite = Color(0xFFFFFFFF);
   static const Color surfaceGrey = Color(0xFFF8F9FB);
+  static const Color surfaceBlue = Color(0xFFD6E6FF);
 
   /// Text Colors
   static const Color textPrimary = Color(0xFF000000);
@@ -72,7 +73,7 @@ class AppStyles {
   static const TextStyle headingMedium = TextStyle(
     fontFamily: fontFamily,
     fontSize: 20,
-    fontWeight: FontWeight.w700,
+    fontWeight: FontWeight.w600,
     height: 1.35,
     color: textPrimary,
   );
@@ -111,7 +112,7 @@ class AppStyles {
 
   static const TextStyle bodyLarge = TextStyle(
     fontFamily: fontFamily,
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: FontWeight.w400,
     height: 1.5,
     color: textSecondary,
@@ -137,9 +138,9 @@ class AppStyles {
   static const TextStyle labelStyle = TextStyle(
     fontFamily: fontFamily,
     fontSize: 13,
-    fontWeight: FontWeight.w600,
+    fontWeight: FontWeight.w400,
     height: 1.38,
-    color: textPrimary,
+    color: textSecondary,
     letterSpacing: 0.25,
   );
 
@@ -152,11 +153,27 @@ class AppStyles {
     letterSpacing: 0.5,
   );
 
+  static const TextStyle titleStyle = TextStyle(
+    fontFamily: fontFamily,
+    fontSize: 28,
+    fontWeight: FontWeight.w500,
+    height: 1.4,
+    color: textPrimary,
+  );
+
+  static const TextStyle blueTitleStyle = TextStyle(
+    fontFamily: fontFamily,
+    fontSize: 28,
+    fontWeight: FontWeight.w500,
+    height: 1.4,
+    color: primaryColor,
+  );
+
   // ==================== SEPARATORS ====================
   static final Widget tinySeparator = SizedBox(height: 4, width: 4);
   static final Widget smallSeparator = SizedBox(height: 8, width: 8);
   static final Widget mediumSeparator = SizedBox(height: 16, width: 16);
-  static final Widget bigSeparator = SizedBox(height: 24, width: 24);
+  static final Widget bigSeparator = SizedBox(height: 48, width: 48);
 
   // ==================== SPACING ====================
 
@@ -205,21 +222,13 @@ class AppStyles {
 
   // ==================== CARD STYLES ====================
 
-  static const double cardBorderRadius = 12;
+  static const double cardBorderRadius = 2;
   static const double cardElevation = 1;
-
-  /// Card Box Decoration
-  static BoxDecoration cardDecoration = BoxDecoration(
-    color: surfaceWhite,
-    borderRadius: const BorderRadius.all(Radius.circular(cardBorderRadius)),
-    boxShadow: [
-      BoxShadow(
-        color: Colors.black.withValues(alpha: 0.05),
-        blurRadius: 4,
-        offset: const Offset(0, 2),
-      ),
-    ],
+  static const RoundedRectangleBorder cardShape = RoundedRectangleBorder(
+    borderRadius: BorderRadius.all(Radius.circular(cardBorderRadius)),
   );
+  static const double cardMargin = 8;
+  static const EdgeInsets padding = EdgeInsets.all(cardMargin);
 
   // ==================== ICON STYLES ====================
   /// Icon Size
@@ -235,15 +244,21 @@ class AppStyles {
 
   static const double appBarLogoHeight = 50;
   static const double appBarLogoWidth = 50;
+  static const double loginScreenLogoHeight = 60;
+  static const double loginScreenLogoWidth = 60;
   static const double splashScreenLogoHeight = 180;
   static const double splashScreenLogoWidth = 180;
+  static const double loginScreenLogoShape = 80;
 
   // ==================== INPUT FIELD STYLES ====================
 
-  static const double inputBorderRadius = 8;
+  static const double inputBorderRadius = 16;
 
   /// Input Decoration Theme
-  static InputDecoration inputDecoration(String labelText, {String? hintText}) {
+  static InputDecoration inputDecoration({
+    required String labelText,
+    String? hintText,
+  }) {
     return InputDecoration(
       labelText: labelText,
       hintText: hintText,
@@ -360,4 +375,6 @@ class AppStyles {
       ),
     );
   }
+
+  static Null get cardBoxDecoration => null;
 }

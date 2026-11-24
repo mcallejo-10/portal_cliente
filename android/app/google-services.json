@@ -1,0 +1,46 @@
+{
+  "project_info": {
+    "project_number": "911392313920",
+    "project_id": "avian-catwalk-459808-i8",
+    "storage_bucket": "avian-catwalk-459808-i8.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:911392313920:android:59e93067c39386f85a05a5",
+        "android_client_info": {
+          "package_name": "cat.cifovirtual.portal_cliente"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "911392313920-gn70nr82qk48b9ghnjlo1feftu59iv6v.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB0zPUcSNg8LjhkHV2oohlyGdd3jcC_CnA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "911392313920-2ec6uh941d71m4l25kmbmhqfo03aucn4.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "911392313920-1ahrep9pqhohsdiac9c2fu0rcplun5v7.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "cat.cifovirtual.portalCliente"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

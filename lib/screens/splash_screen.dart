@@ -1,5 +1,8 @@
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-//import 'package:portal_cliente/screens/home_screen.dart';
+import 'package:portal_cliente/firebase_options.dart';
+import 'package:portal_cliente/screens/home_screen.dart';
 import 'package:portal_cliente/screens/login_screen.dart';
 import 'package:portal_cliente/styles/app_styles.dart';
 
@@ -7,7 +10,7 @@ class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
 
   @override
-  _SplashScreenState createState() => _SplashScreenState();
+  State<SplashScreen> createState() => _SplashScreenState();
 }
 
 class _SplashScreenState extends State<SplashScreen> {
@@ -41,14 +44,20 @@ class _SplashScreenState extends State<SplashScreen> {
   }
 
   Future<void> init() async {
-    await Future.delayed(Duration(seconds: 2));
+    await Future.delayed(Duration(seconds: 4));
     status = "Cargando base de datos...";
-    await Future.delayed(Duration(seconds: 2));
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
+    if (!mounted) return;
+    final user = FirebaseAuth.instance.currentUser;
+    final Widget destino = (user != null && user.emailVerified)
+        ? const HomeScreen()
+        : const LoginScreen();
     Navigator.pushReplacement(
       context,
-      MaterialPageRoute(builder: (context) => const LoginScreen()),
+      MaterialPageRoute(builder: (context) => destino),
     );
-
     setState(() {});
   }
 }
