@@ -44,7 +44,7 @@ class _SplashScreenState extends State<SplashScreen> {
   }
 
   Future<void> init() async {
-    await Future.delayed(Duration(seconds: 4));
+    await Future.delayed(Duration(seconds: 2));
     status = "Cargando base de datos...";
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
