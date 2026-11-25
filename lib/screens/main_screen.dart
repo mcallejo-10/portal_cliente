@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:portal_cliente/styles/app_styles.dart';
+import 'package:portal_cliente/widgets/portal_app_bar.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -8,47 +8,11 @@ class MainScreen extends StatefulWidget {
   MainScreenState createState() => MainScreenState();
 }
 
-final bool imageProfile = false;
-
 class MainScreenState extends State<MainScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Row(
-          children: [
-            Image(
-              image: AssetImage('assets/logo_Daniel.png'),
-              height: AppStyles.appBarLogoHeight,
-              width: AppStyles.appBarLogoWidth,
-            ),
-            SizedBox(width: 8),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text('PORTAL CLIENTE', style: AppStyles.subheadingSmall),
-                Text('Inicio', style: AppStyles.headingMedium),
-              ],
-            ),
-          ],
-        ),
-        actions: [
-          IconButton(
-            icon: Icon(Icons.notifications_outlined),
-            onPressed: () {},
-          ),
-
-          Container(
-            decoration: BoxDecoration(color: AppStyles.primaryColor),
-            child: imageProfile
-                ? Image(image: AssetImage('assets/profile_icon.png'))
-                : Text('MC', style: AppStyles.headingMedium),
-          ),
-        ],
-
-        toolbarHeight: 100.0,
-      ),
-
+      appBar: const PortalAppBar(title: 'Inicio'),
       body: Center(
         child: Column(children: [Text('Welcome to the Main Screen')]),
       ),

@@ -303,13 +303,50 @@ class AppStyles {
 
   // ==================== IMAGE STYLES ====================
 
-  static const double appBarLogoHeight = 50;
-  static const double appBarLogoWidth = 50;
+  static const double appBarLogoHeight = 36;
+  static const double appBarLogoWidth = 36;
   static const double loginScreenLogoHeight = 44;
   static const double loginScreenLogoWidth = 44;
   static const double splashScreenLogoHeight = 180;
   static const double splashScreenLogoWidth = 180;
   static const double loginScreenLogoShape = 64;
+
+  // ==================== APP BAR ====================
+
+  static const double appBarHeight = 64;
+
+  /// Small uppercase text above the screen title ("PORTAL CLIENTE")
+  static const TextStyle appBarOverlineStyle = TextStyle(
+    fontFamily: fontFamily,
+    fontSize: 11,
+    fontWeight: FontWeight.w500,
+    height: 1.3,
+    color: textTertiary,
+    letterSpacing: 0.8,
+  );
+
+  static const TextStyle appBarTitleStyle = TextStyle(
+    fontFamily: fontFamily,
+    fontSize: 18,
+    fontWeight: FontWeight.w600,
+    height: 1.25,
+    color: textPrimary,
+  );
+
+  // ==================== AVATAR ====================
+
+  static const double avatarSize = 36;
+  static const Color avatarBackground = primaryColor;
+
+  /// Initials shown in the avatar when the user has no photo
+  static const TextStyle avatarInitialsStyle = TextStyle(
+    fontFamily: fontFamily,
+    fontSize: 14,
+    fontWeight: FontWeight.w600,
+    height: 1,
+    color: surfaceWhite,
+    letterSpacing: 0.5,
+  );
 
   // ==================== AUTH SCREENS (login / activate account) ====================
 
