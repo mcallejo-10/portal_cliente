@@ -16,6 +16,7 @@ class AppStyles {
   static const Color surfaceWhite = Color(0xFFFFFFFF);
   static const Color surfaceGrey = Color(0xFFF8F9FB);
   static const Color surfaceBlue = Color(0xFFD6E6FF);
+  static const Color inputFillColor = Color(0xFFEEF0F5);
 
   /// Text Colors
   static const Color textPrimary = Color(0xFF000000);
@@ -155,7 +156,7 @@ class AppStyles {
 
   static const TextStyle titleStyle = TextStyle(
     fontFamily: fontFamily,
-    fontSize: 28,
+    fontSize: 24,
     fontWeight: FontWeight.w500,
     height: 1.4,
     color: textPrimary,
@@ -163,8 +164,50 @@ class AppStyles {
 
   static const TextStyle blueTitleStyle = TextStyle(
     fontFamily: fontFamily,
-    fontSize: 28,
+    fontSize: 24,
     fontWeight: FontWeight.w500,
+    height: 1.4,
+    color: primaryColor,
+  );
+
+  /// Subtitle shown under the app title (login / activate account)
+  static const TextStyle subtitleStyle = TextStyle(
+    fontFamily: fontFamily,
+    fontSize: 13,
+    fontWeight: FontWeight.w400,
+    height: 1.4,
+    color: textSecondary,
+  );
+
+  /// Label placed above a form field
+  static const TextStyle fieldLabelStyle = TextStyle(
+    fontFamily: fontFamily,
+    fontSize: 13,
+    fontWeight: FontWeight.w600,
+    height: 1.4,
+    color: textPrimary,
+  );
+
+  /// Text typed inside a form field
+  static const TextStyle inputTextStyle = TextStyle(
+    fontFamily: fontFamily,
+    fontSize: 14,
+    fontWeight: FontWeight.w400,
+    height: 1.4,
+    color: textSecondary,
+  );
+
+  static const TextStyle buttonTextStyle = TextStyle(
+    fontFamily: fontFamily,
+    fontSize: 15,
+    fontWeight: FontWeight.w600,
+    height: 1.3,
+  );
+
+  static const TextStyle linkStyle = TextStyle(
+    fontFamily: fontFamily,
+    fontSize: 13,
+    fontWeight: FontWeight.w700,
     height: 1.4,
     color: primaryColor,
   );
@@ -190,19 +233,35 @@ class AppStyles {
 
   // ==================== BUTTON STYLES ====================
 
+  static const double buttonHeight = 48;
+  static const double buttonBorderRadius = 8;
+  static const double buttonIconSize = 20;
+
   /// Primary Button Style
   static const ButtonStyle primaryButtonStyle = ButtonStyle(
     backgroundColor: WidgetStatePropertyAll(primaryColor),
     foregroundColor: WidgetStatePropertyAll(surfaceWhite),
+    elevation: WidgetStatePropertyAll(0),
     padding: WidgetStatePropertyAll(
       EdgeInsets.symmetric(horizontal: spacing24, vertical: spacing12),
     ),
     shape: WidgetStatePropertyAll(
       RoundedRectangleBorder(
-        borderRadius: BorderRadius.all(Radius.circular(8)),
+        borderRadius: BorderRadius.all(Radius.circular(buttonBorderRadius)),
       ),
     ),
-    textStyle: WidgetStatePropertyAll(labelStyle),
+    textStyle: WidgetStatePropertyAll(buttonTextStyle),
+  );
+
+  /// Link Button Style (text-only actions such as "¿Has olvidado tu contraseña?")
+  static const ButtonStyle linkButtonStyle = ButtonStyle(
+    foregroundColor: WidgetStatePropertyAll(primaryColor),
+    padding: WidgetStatePropertyAll(
+      EdgeInsets.symmetric(horizontal: spacing12, vertical: spacing8),
+    ),
+    minimumSize: WidgetStatePropertyAll(Size(0, 36)),
+    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+    textStyle: WidgetStatePropertyAll(linkStyle),
   );
 
   /// Secondary Button Style
@@ -222,8 +281,10 @@ class AppStyles {
 
   // ==================== CARD STYLES ====================
 
-  static const double cardBorderRadius = 2;
+  static const double cardBorderRadius = 4;
   static const double cardElevation = 1;
+  static const Color cardShadowColor = Color(0x33000000);
+  static const EdgeInsets cardContentPadding = EdgeInsets.all(spacing20);
   static const RoundedRectangleBorder cardShape = RoundedRectangleBorder(
     borderRadius: BorderRadius.all(Radius.circular(cardBorderRadius)),
   );
@@ -244,55 +305,77 @@ class AppStyles {
 
   static const double appBarLogoHeight = 50;
   static const double appBarLogoWidth = 50;
-  static const double loginScreenLogoHeight = 60;
-  static const double loginScreenLogoWidth = 60;
+  static const double loginScreenLogoHeight = 44;
+  static const double loginScreenLogoWidth = 44;
   static const double splashScreenLogoHeight = 180;
   static const double splashScreenLogoWidth = 180;
-  static const double loginScreenLogoShape = 80;
+  static const double loginScreenLogoShape = 64;
+
+  // ==================== AUTH SCREENS (login / activate account) ====================
+
+  /// Max width of the content column so it does not stretch on tablets / web
+  static const double authContentMaxWidth = 420;
+  static const EdgeInsets authScreenPadding = EdgeInsets.symmetric(
+    horizontal: spacing24,
+    vertical: spacing32,
+  );
+  static const double authFooterIconSize = 16;
 
   // ==================== INPUT FIELD STYLES ====================
 
-  static const double inputBorderRadius = 16;
+  /// Pill-shaped fields: the radius is larger than half the field height
+  static const double inputBorderRadius = 28;
+  static const double inputIconSize = 20;
 
-  /// Input Decoration Theme
+  static OutlineInputBorder _inputBorder([BorderSide side = BorderSide.none]) {
+    return OutlineInputBorder(
+      borderRadius: const BorderRadius.all(Radius.circular(inputBorderRadius)),
+      borderSide: side,
+    );
+  }
+
+  /// Input Decoration: filled pill without border, optional leading icon and
+  /// trailing widget (e.g. the show/hide password button).
+  /// The field label goes above the field using [fieldLabelStyle].
   static InputDecoration inputDecoration({
-    required String labelText,
     String? hintText,
+    IconData? prefixIcon,
+    Widget? suffixIcon,
   }) {
     return InputDecoration(
-      labelText: labelText,
       hintText: hintText,
-      labelStyle: labelStyle,
-      hintStyle: bodySmall.copyWith(color: textLight),
+      hintStyle: inputTextStyle.copyWith(color: textLight),
+      errorStyle: bodySmall.copyWith(color: errorColor),
+      errorMaxLines: 2,
       filled: true,
-      fillColor: backgroundLight,
+      fillColor: inputFillColor,
       contentPadding: const EdgeInsets.symmetric(
         horizontal: spacing16,
         vertical: spacing12,
       ),
-      border: OutlineInputBorder(
-        borderRadius: const BorderRadius.all(
-          Radius.circular(inputBorderRadius),
-        ),
-        borderSide: const BorderSide(color: borderColor),
+      prefixIcon: prefixIcon == null
+          ? null
+          : Padding(
+              padding: const EdgeInsets.only(left: spacing16, right: spacing8),
+              child: Icon(prefixIcon, size: inputIconSize),
+            ),
+      prefixIconConstraints: const BoxConstraints(minHeight: buttonHeight),
+      prefixIconColor: textSecondary,
+      suffixIcon: suffixIcon == null
+          ? null
+          : Padding(
+              padding: const EdgeInsets.only(right: spacing4),
+              child: suffixIcon,
+            ),
+      suffixIconColor: textSecondary,
+      border: _inputBorder(),
+      enabledBorder: _inputBorder(),
+      focusedBorder: _inputBorder(
+        const BorderSide(color: primaryColor, width: 1.5),
       ),
-      enabledBorder: OutlineInputBorder(
-        borderRadius: const BorderRadius.all(
-          Radius.circular(inputBorderRadius),
-        ),
-        borderSide: const BorderSide(color: dividerColor),
-      ),
-      focusedBorder: OutlineInputBorder(
-        borderRadius: const BorderRadius.all(
-          Radius.circular(inputBorderRadius),
-        ),
-        borderSide: const BorderSide(color: primaryColor, width: 2),
-      ),
-      errorBorder: OutlineInputBorder(
-        borderRadius: const BorderRadius.all(
-          Radius.circular(inputBorderRadius),
-        ),
-        borderSide: const BorderSide(color: errorColor),
+      errorBorder: _inputBorder(const BorderSide(color: errorColor)),
+      focusedErrorBorder: _inputBorder(
+        const BorderSide(color: errorColor, width: 1.5),
       ),
     );
   }
@@ -331,30 +414,24 @@ class AppStyles {
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(style: primaryButtonStyle),
       outlinedButtonTheme: OutlinedButtonThemeData(style: secondaryButtonStyle),
+      textButtonTheme: TextButtonThemeData(style: linkButtonStyle),
+      checkboxTheme: const CheckboxThemeData(
+        shape: CircleBorder(),
+        side: BorderSide(color: borderColor, width: 1.5),
+        visualDensity: VisualDensity.compact,
+        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+      ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: backgroundLight,
+        fillColor: inputFillColor,
         contentPadding: const EdgeInsets.symmetric(
           horizontal: spacing16,
           vertical: spacing12,
         ),
-        border: OutlineInputBorder(
-          borderRadius: const BorderRadius.all(
-            Radius.circular(inputBorderRadius),
-          ),
-          borderSide: const BorderSide(color: borderColor),
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: const BorderRadius.all(
-            Radius.circular(inputBorderRadius),
-          ),
-          borderSide: const BorderSide(color: dividerColor),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: const BorderRadius.all(
-            Radius.circular(inputBorderRadius),
-          ),
-          borderSide: const BorderSide(color: primaryColor, width: 2),
+        border: _inputBorder(),
+        enabledBorder: _inputBorder(),
+        focusedBorder: _inputBorder(
+          const BorderSide(color: primaryColor, width: 1.5),
         ),
       ),
       floatingActionButtonTheme: FloatingActionButtonThemeData(

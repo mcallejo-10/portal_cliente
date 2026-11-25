@@ -2,9 +2,15 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 import '../styles/app_styles.dart';
+import '../widgets/auth_layout.dart';
 
 class ActivateAccountScreen extends StatefulWidget {
-  const ActivateAccountScreen({super.key});
+  const ActivateAccountScreen({super.key, this.recuperarPassword = false});
+
+  /// `true` cuando se llega desde "¿Has olvidado tu contraseña?". El flujo es
+  /// el mismo (enlace por correo para crear la contraseña); solo cambian los
+  /// textos.
+  final bool recuperarPassword;
 
   @override
   State<ActivateAccountScreen> createState() => _ActivateAccountScreenState();
@@ -50,7 +56,9 @@ class _ActivateAccountScreenState extends State<ActivateAccountScreen> {
 
     if (!mounted) return;
     _mostrarMensaje(
-      'Si el correo pertenece a una cuenta invitada, recibirás un enlace para crear tu contraseña.',
+      widget.recuperarPassword
+          ? 'Si el correo pertenece a una cuenta, recibirás un enlace para restablecer tu contraseña.'
+          : 'Si el correo pertenece a una cuenta invitada, recibirás un enlace para crear tu contraseña.',
     );
   }
 
@@ -62,29 +70,39 @@ class _ActivateAccountScreenState extends State<ActivateAccountScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppStyles.backgroundDefault,
-      appBar: AppBar(title: const Text('Activar cuenta')),
-      body: Padding(
-        padding: const EdgeInsets.all(AppStyles.spacing12),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text('Primera vez', style: AppStyles.headingMedium),
-              AppStyles.smallSeparator,
-              Text(
-                'Introduce el correo con el que te hemos invitado y te enviaremos un enlace para crear tu contraseña.',
-                style: AppStyles.bodySmall,
-              ),
-              AppStyles.mediumSeparator,
-              TextFormField(
+    final recuperar = widget.recuperarPassword;
+    return AuthLayout(
+      child: Form(
+        key: _formKey,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text(
+              recuperar ? 'Recuperar contraseña' : 'Activar cuenta',
+              style: AppStyles.subheadingStyle,
+            ),
+            AppStyles.tinySeparator,
+            Text(
+              recuperar
+                  ? 'Introduce el correo de tu cuenta y te enviaremos un enlace para restablecer tu contraseña.'
+                  : 'Introduce el correo con el que te hemos invitado y te enviaremos un enlace para crear tu contraseña.',
+              style: AppStyles.bodySmall,
+            ),
+            AppStyles.mediumSeparator,
+            AuthField(
+              label: 'Correo electrónico',
+              field: TextFormField(
                 controller: _emailController,
                 keyboardType: TextInputType.emailAddress,
+                textInputAction: TextInputAction.done,
+                autofillHints: const [AutofillHints.email],
+                onFieldSubmitted: (_) {
+                  if (!_loading) _enviarEnlace();
+                },
+                style: AppStyles.inputTextStyle,
                 decoration: AppStyles.inputDecoration(
-                  labelText: 'Correo electrónico',
                   hintText: 'contacto@email.com',
+                  prefixIcon: Icons.mail_outline,
                 ),
                 validator: (value) {
                   final email = value?.trim() ?? '';
@@ -97,19 +115,25 @@ class _ActivateAccountScreenState extends State<ActivateAccountScreen> {
                   return null;
                 },
               ),
-              AppStyles.mediumSeparator,
-              ElevatedButton(
-                onPressed: _loading ? null : _enviarEnlace,
-                child: _loading
-                    ? const SizedBox(
-                        height: 20,
-                        width: 20,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      )
-                    : const Text('Enviar enlace'),
+            ),
+            const SizedBox(height: AppStyles.spacing24),
+            AuthSubmitButton(
+              label: 'Enviar enlace',
+              loading: _loading,
+              onPressed: _enviarEnlace,
+            ),
+            AppStyles.smallSeparator,
+            Center(
+              child: TextButton.icon(
+                onPressed: () => Navigator.pop(context),
+                icon: const Icon(
+                  Icons.arrow_back,
+                  size: AppStyles.inputIconSize,
+                ),
+                label: const Text('Volver a iniciar sesión'),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );

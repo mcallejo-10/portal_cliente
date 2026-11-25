@@ -1,7 +1,9 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../styles/app_styles.dart';
+import '../widgets/auth_layout.dart';
 import 'activate_account_screen.dart';
 import 'home_screen.dart';
 
@@ -18,6 +20,8 @@ class _LoginScreenState extends State<LoginScreen> {
   final _passwordController = TextEditingController();
   static final _emailRegex = RegExp(r'^[^\s@]+@[^\s@]+\.[^\s@]+$');
   bool _loading = false;
+  bool _ocultarPassword = true;
+  bool _recordarDispositivo = true;
 
   @override
   void dispose() {
@@ -31,6 +35,13 @@ class _LoginScreenState extends State<LoginScreen> {
 
     setState(() => _loading = true);
     try {
+      // La persistencia de sesión solo es configurable en web; en móvil
+      // Firebase mantiene siempre la sesión en el dispositivo.
+      if (kIsWeb) {
+        await FirebaseAuth.instance.setPersistence(
+          _recordarDispositivo ? Persistence.LOCAL : Persistence.SESSION,
+        );
+      }
       final credential = await FirebaseAuth.instance.signInWithEmailAndPassword(
         email: _emailController.text.trim(),
         password: _passwordController.text,
@@ -82,154 +93,136 @@ class _LoginScreenState extends State<LoginScreen> {
       ..showSnackBar(SnackBar(content: Text(texto)));
   }
 
+  void _abrirActivarCuenta({bool recuperarPassword = false}) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) =>
+            ActivateAccountScreen(recuperarPassword: recuperarPassword),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppStyles.backgroundDefault,
-      body: Padding(
-        padding: const EdgeInsets.all(AppStyles.spacing12),
+    return AuthLayout(
+      child: Form(
+        key: _formKey,
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          crossAxisAlignment: CrossAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            AppStyles.bigSeparator,
-            Padding(
-              padding: const EdgeInsets.all(AppStyles.spacing8),
-              child: Stack(
-                alignment: Alignment.center,
-                children: [
-                  Container(
-                    decoration: BoxDecoration(
-                      color: AppStyles.surfaceBlue,
-                      shape: BoxShape.circle,
+            const Text('Acceso Clientes', style: AppStyles.subheadingStyle),
+            AppStyles.tinySeparator,
+            const Text(
+              'Introduce tus credenciales para acceder a tu despacho virtual',
+              style: AppStyles.bodySmall,
+            ),
+            AppStyles.mediumSeparator,
+            AuthField(
+              label: 'Correo electrónico',
+              field: TextFormField(
+                controller: _emailController,
+                keyboardType: TextInputType.emailAddress,
+                textInputAction: TextInputAction.next,
+                autofillHints: const [AutofillHints.email],
+                style: AppStyles.inputTextStyle,
+                decoration: AppStyles.inputDecoration(
+                  hintText: 'contacto@email.com',
+                  prefixIcon: Icons.mail_outline,
+                ),
+                validator: (value) {
+                  final email = value?.trim() ?? '';
+                  if (email.isEmpty) {
+                    return 'Introduce tu correo electrónico';
+                  }
+                  if (!_emailRegex.hasMatch(email)) {
+                    return 'El correo no tiene un formato válido';
+                  }
+                  return null;
+                },
+              ),
+            ),
+            AppStyles.mediumSeparator,
+            AuthField(
+              label: 'Contraseña',
+              field: TextFormField(
+                controller: _passwordController,
+                obscureText: _ocultarPassword,
+                textInputAction: TextInputAction.done,
+                autofillHints: const [AutofillHints.password],
+                onFieldSubmitted: (_) {
+                  if (!_loading) _onLogin();
+                },
+                style: AppStyles.inputTextStyle,
+                decoration: AppStyles.inputDecoration(
+                  hintText: 'Tu contraseña',
+                  prefixIcon: Icons.lock_outline,
+                  suffixIcon: IconButton(
+                    onPressed: () =>
+                        setState(() => _ocultarPassword = !_ocultarPassword),
+                    tooltip: _ocultarPassword
+                        ? 'Mostrar contraseña'
+                        : 'Ocultar contraseña',
+                    iconSize: AppStyles.inputIconSize,
+                    icon: Icon(
+                      _ocultarPassword
+                          ? Icons.visibility_outlined
+                          : Icons.visibility_off_outlined,
                     ),
-                    height: AppStyles.loginScreenLogoShape,
-                    width: AppStyles.loginScreenLogoShape,
                   ),
-                  Image.asset(
-                    'assets/logo_Daniel.png',
-                    height: AppStyles.loginScreenLogoHeight,
-                    width: AppStyles.loginScreenLogoWidth,
-                  ),
-                ],
+                ),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Introduce tu contraseña';
+                  }
+                  return null;
+                },
               ),
             ),
-            AppStyles.mediumSeparator,
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text('Portal', style: AppStyles.titleStyle),
-                AppStyles.smallSeparator,
-                Text('Cliente', style: AppStyles.blueTitleStyle),
-              ],
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: AppStyles.spacing12,
-              ),
-              child: Text(
-                'Portal Inteligente de Gestión Contable y Fiscal',
-                style: AppStyles.bodyLarge,
-              ),
-            ),
-            AppStyles.mediumSeparator,
-            Card(
-              elevation: AppStyles.cardElevation,
-              shape: AppStyles.cardShape,
-              margin: EdgeInsets.all(AppStyles.spacing12),
+            AppStyles.smallSeparator,
+            InkWell(
+              onTap: () =>
+                  setState(() => _recordarDispositivo = !_recordarDispositivo),
+              borderRadius: BorderRadius.circular(AppStyles.buttonBorderRadius),
               child: Padding(
-                padding: const EdgeInsets.all(AppStyles.spacing12),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                padding: const EdgeInsets.symmetric(
+                  vertical: AppStyles.spacing4,
+                ),
+                child: Row(
                   children: [
-                    Padding(
-                      padding: const EdgeInsets.all(AppStyles.spacing16),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Acceso clientes',
-                            style: AppStyles.headingMedium,
-                            textAlign: TextAlign.start,
-                          ),
-                          Text(
-                            'Introduce tus credenciales para acceder al portal.',
-                            style: AppStyles.bodySmall,
-                          ),
-                        ],
-                      ),
+                    Checkbox(
+                      value: _recordarDispositivo,
+                      onChanged: (value) =>
+                          setState(() => _recordarDispositivo = value ?? false),
                     ),
-                    Form(
-                      key: _formKey,
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.spaceAround,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          SizedBox(height: AppStyles.spacing16),
-                          Text('Correo electrónico'),
-                          TextFormField(
-                            controller: _emailController,
-                            keyboardType: TextInputType.emailAddress,
-                            decoration: AppStyles.inputDecoration(
-                              labelText: 'contacto@email.com',
-                              hintText: 'Correo electrónico',
-                            ),
-                            validator: (value) {
-                              final email = value?.trim() ?? '';
-                              if (email.isEmpty) {
-                                return 'Introduce tu correo electrónico';
-                              }
-                              if (!_emailRegex.hasMatch(email)) {
-                                return 'El correo no tiene un formato válido';
-                              }
-                              return null;
-                            },
-                          ),
-                          AppStyles.smallSeparator,
-                          Text('Contraseña'),
-                          TextFormField(
-                            controller: _passwordController,
-                            decoration: AppStyles.inputDecoration(
-                              labelText: 'Contraseña',
-                              hintText: 'Introduce tu contraseña',
-                            ),
-                            obscureText: true,
-                            validator: (value) {
-                              if (value == null || value.isEmpty) {
-                                return 'Introduce tu contraseña';
-                              }
-                              return null;
-                            },
-                          ),
-                          ElevatedButton(
-                            onPressed: _loading ? null : _onLogin,
-                            child: _loading
-                                ? const SizedBox(
-                                    height: 20,
-                                    width: 20,
-                                    child: CircularProgressIndicator(
-                                      strokeWidth: 2,
-                                    ),
-                                  )
-                                : Text('Login'),
-                          ),
-                          TextButton(
-                            onPressed: () => Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) =>
-                                    const ActivateAccountScreen(),
-                              ),
-                            ),
-                            child: const Text('¿Primera vez? Activa tu cuenta'),
-                          ),
-                        ],
+                    const SizedBox(width: AppStyles.spacing4),
+                    const Flexible(
+                      child: Text(
+                        'Recordar mi dispositivo',
+                        style: AppStyles.bodySmall,
                       ),
                     ),
                   ],
                 ),
+              ),
+            ),
+            AppStyles.mediumSeparator,
+            AuthSubmitButton(
+              label: 'Iniciar Sesión',
+              loading: _loading,
+              onPressed: _onLogin,
+            ),
+            AppStyles.smallSeparator,
+            Center(
+              child: TextButton(
+                onPressed: () => _abrirActivarCuenta(recuperarPassword: true),
+                child: const Text('¿Has olvidado tu contraseña?'),
+              ),
+            ),
+            Center(
+              child: TextButton(
+                onPressed: _abrirActivarCuenta,
+                child: const Text('¿Primera vez? Activa tu cuenta'),
               ),
             ),
           ],
