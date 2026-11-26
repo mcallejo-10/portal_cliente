@@ -1,9 +1,10 @@
 # Contrato de la API — Portal Cliente
 
-**Estado:** Fases 0, 1, 2 y 3 implementadas (`ping`, `registerClient`,
-`getProfile`, `getInvoices`, `getInvoice`, `getInvoiceFile`, `uploadInvoice`,
-`getUploadStatus`). Los endpoints marcados como **(borrador)** todavía no están
-implementados y sus campos pueden cambiar al llegar su fase.
+**Estado:** Fases 0, 1, 2, 3 y 4 implementadas; la Fase 4 es aproximada y
+pendiente de validación fiscal (`ping`, `registerClient`, `getProfile`,
+`getInvoices`, `getInvoice`, `getInvoiceFile`, `uploadInvoice`,
+`getUploadStatus`, `getDashboard`). Los endpoints marcados como **(borrador)**
+todavía no están implementados y sus campos pueden cambiar al llegar su fase.
 
 **Versión de API:** `1`
 
@@ -70,22 +71,26 @@ alcance sigue siendo `docs/PLAN_PORTAL_CLIENTE_API.md`.
 
 ## 2. Códigos de error
 
-| Código | Significado para la app |
-|---|---|
-| `AUTH_REQUIRED` | Falta el `idToken`. |
-| `AUTH_INVALID` | Token inválido o no reconocido por Firebase. |
-| `AUTH_EXPIRED` | Token caducado. Renovar con `getIdToken(true)`. |
-| `ACCOUNT_PENDING` | El usuario existe pero no está activo o no ha reclamado la invitación. |
-| `ACCOUNT_DISABLED` | El usuario está bloqueado. |
-| `FORBIDDEN` | Sin permiso (email no verificado, cliente inactivo, invitación no válida). |
-| `NOT_FOUND` | Recurso inexistente o ajeno. No revela existencia de datos de otros clientes. |
-| `VALIDATION_ERROR` | Petición mal formada o campos obligatorios ausentes. |
-| `RATE_LIMITED` | Demasiados intentos o solicitud en curso. Reintentar más tarde. |
-| `DUPLICATE` | Documento ya subido (Fase 3). |
-| `FILE_TOO_LARGE` | Archivo por encima del límite (Fase 3). |
-| `UNSUPPORTED_MEDIA_TYPE` | MIME no permitido (Fase 3). |
-| `CLIENT_FOLDER_NOT_READY` | El cliente no tiene INBOX disponible (Fase 3). |
-| `INTERNAL_ERROR` | Error del servidor. Mostrar mensaje genérico y usar `requestId`. |
+| Código                    | Significado para la app                                                       |
+| ------------------------- | ----------------------------------------------------------------------------- |
+| `AUTH_REQUIRED`           | Falta el `idToken`.                                                           |
+| `AUTH_INVALID`            | Token inválido o no reconocido por Firebase.                                  |
+| `AUTH_EXPIRED`            | Token caducado. Renovar con `getIdToken(true)`.                               |
+| `ACCOUNT_PENDING`         | El usuario existe pero no está activo o no ha reclamado la invitación.        |
+| `ACCOUNT_DISABLED`        | El usuario está bloqueado.                                                    |
+| `FORBIDDEN`               | Sin permiso (email no verificado, cliente inactivo, invitación no válida).    |
+| `NOT_FOUND`               | Recurso inexistente o ajeno. No revela existencia de datos de otros clientes. |
+| `VALIDATION_ERROR`        | Petición mal formada o campos obligatorios ausentes.                          |
+| `RATE_LIMITED`            | Demasiados intentos o solicitud en curso. Reintentar más tarde.               |
+| `DUPLICATE`               | Documento ya subido (Fase 3).                                                 |
+| `FILE_TOO_LARGE`          | Archivo por encima del límite (Fase 3).                                       |
+| `UNSUPPORTED_MEDIA_TYPE`  | MIME no permitido (Fase 3).                                                   |
+| `CLIENT_FOLDER_NOT_READY` | El cliente no tiene INBOX disponible (Fase 3).                                |
+| `INTERNAL_ERROR`          | Error del servidor. Mostrar mensaje genérico y usar `requestId`.              |
+
+Límite de peticiones: 120 por minuto y usuario (UID), contando todas las
+acciones autenticadas y `registerClient`. Al superarlo se responde `RATE_LIMITED`
+hasta el minuto siguiente.
 
 Ante `AUTH_INVALID`/`AUTH_EXPIRED`: renovar el token una vez y reintentar. Ante
 `ACCOUNT_PENDING`: mostrar pantalla de cuenta pendiente, sin datos de cliente.
@@ -171,7 +176,6 @@ Activa la cuenta consumiendo una invitación. Requiere token con email verificad
       "address": "Calle Ejemplo 1"
     },
     "managerEmail": "gestor@example.com",
-    "aeatStatus": "PENDIENTE",
     "memberSince": "",
     "lastLoginAt": "2026-11-15T10:00:00+01:00"
   }
@@ -189,7 +193,12 @@ Devuelve el perfil del cliente autenticado. Requiere token y cuenta activa.
 **Petición**
 
 ```json
-{ "action": "getProfile", "apiVersion": "1", "idToken": "eyJhbGciOi...", "data": {} }
+{
+  "action": "getProfile",
+  "apiVersion": "1",
+  "idToken": "eyJhbGciOi...",
+  "data": {}
+}
 ```
 
 **Respuesta `data`**
@@ -205,11 +214,15 @@ Devuelve el perfil del cliente autenticado. Requiere token y cuenta activa.
     "address": "Calle Ejemplo 1"
   },
   "managerEmail": "gestor@example.com",
-  "aeatStatus": "CONECTADO",
   "memberSince": "2026-01-01T09:00:00+01:00",
   "lastLoginAt": "2026-11-10T09:00:00+01:00"
 }
 ```
+
+`client.status` es el estado del cliente en la gestoría, leído de
+`CLIENTS_REGISTRY.STATUS`: `ACTIVO`, `SEMIACTIVO` o `INACTIVO`. La API solo deja
+entrar a clientes `ACTIVO` o `SEMIACTIVO`. No hay estado AEAT: los clientes no
+tienen alta directa en AEAT.
 
 Errores habituales: `AUTH_REQUIRED`, `AUTH_INVALID`, `AUTH_EXPIRED`,
 `ACCOUNT_PENDING`, `ACCOUNT_DISABLED`, `FORBIDDEN`.
@@ -219,8 +232,9 @@ Errores habituales: `AUTH_REQUIRED`, `AUTH_INVALID`, `AUTH_EXPIRED`,
 ## 5. Consulta de facturas y endpoints previstos
 
 `getInvoices`, `getInvoice` y `getInvoiceFile` están implementados (Fase 2),
-así como `uploadInvoice` y `getUploadStatus` (Fase 3). Los endpoints de Fase 4
-siguen marcados como **(borrador)**.
+así como `uploadInvoice` y `getUploadStatus` (Fase 3). `getDashboard` (Fase 4)
+está implementado de forma aproximada. Los endpoints de Fase 5 siguen marcados
+como **(borrador)**.
 
 ### 5.1 `getInvoices` (Fase 2 — implementado)
 
@@ -324,7 +338,8 @@ servidor valida que el MIME esté permitido, que la cabecera real del archivo
 coincida (PDF, JPEG o PNG) y que la extensión sea coherente. El nombre se sanea
 y el archivo se guarda como `PORTAL_<YYYYMMDD_HHmmss>_<nombre>.<ext>`. Los
 duplicados se detectan por MD5 contra `PORTAL_UPLOADS` y `LOG_PROCESO` (el
-pipeline de FacturIA usa MD5).
+pipeline de FacturIA usa MD5). Un archivo que el pipeline cerró en `ERROR` no
+cuenta como duplicado: el cliente puede volver a subirlo.
 
 **Respuesta `data`:** `{ "uploadId": "uuid", "fileId": "1AbC..." }`
 
@@ -352,11 +367,11 @@ Estados: `EN_COLA`, `PROCESANDO`, `REVISION`, `PROCESADO`, `ERROR`, `DUPLICADO`.
 El estado se deriva en el servidor; la app puede hacer polling cada 3 segundos.
 Las subidas de otro cliente responden `NOT_FOUND`.
 
-### 5.6 `getDashboard` (Fase 4, pendiente de Daniel)
+### 5.6 `getDashboard` (Fase 4 — implementado, aproximado)
 
 **Petición `data`:** `{}`
 
-**Respuesta `data` (borrador):**
+**Respuesta `data`:**
 
 ```json
 {
@@ -364,31 +379,59 @@ Las subidas de otro cliente responden `NOT_FOUND`.
     "quarterLabel": "T4 2026",
     "dateFrom": "2026-10-01",
     "dateTo": "2026-12-31",
-    "daysToClose": 45
+    "daysToClose": 45,
+    "filingDeadline": "2027-01-30",
+    "daysToDeadline": 75
   },
   "confirmed": {
     "invoiceCount": 12,
-    "expenses": 1200.0,
+    "nonEurCount": 0,
     "income": 3000.0,
+    "expenses": 1200.0,
+    "outputVat": 630.0,
     "deductibleVat": 252.0,
-    "withheldIrpf": 0.0,
-    "pendingReview": 0
+    "vatBalance": 378.0,
+    "withheldIrpf": 450.0,
+    "supplierIrpf": 0.0
   },
   "provisional": {
     "invoiceCount": 3,
-    "expenses": 300.0,
+    "nonEurCount": 0,
     "income": 0.0,
+    "expenses": 300.0,
+    "outputVat": 0.0,
     "deductibleVat": 63.0,
+    "vatBalance": -63.0,
     "withheldIrpf": 0.0,
-    "pendingReview": 3
+    "supplierIrpf": 0.0
   }
 }
 ```
 
+| Campo                               | Significado                                                                                                                                    |
+| ----------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| `daysToClose`                       | Días hasta el último día del trimestre.                                                                                                        |
+| `filingDeadline` / `daysToDeadline` | Plazo orientativo de presentación: día 20 del mes siguiente al trimestre, o 30 de enero para el cuarto. No ajusta festivos ni fines de semana. |
+| `invoiceCount`                      | Facturas del bloque. Las pendientes de revisión son `provisional.invoiceCount`.                                                                |
+| `nonEurCount`                       | Facturas del bloque en otra divisa. Se cuentan, pero no se suman a los importes.                                                               |
+| `income` / `expenses`               | Suma de bases imponibles (sin IVA) de `EMITIDA` y de `RECIBIDA`/`TICKET`.                                                                      |
+| `outputVat` / `deductibleVat`       | IVA repercutido (`EMITIDA`) y soportado (`RECIBIDA`/`TICKET`).                                                                                 |
+| `vatBalance`                        | `outputVat − deductibleVat`. Positivo: IVA a ingresar; negativo: a compensar.                                                                  |
+| `withheldIrpf`                      | IRPF que los clientes han retenido en las facturas emitidas.                                                                                   |
+| `supplierIrpf`                      | IRPF retenido a proveedores en las facturas recibidas.                                                                                         |
+
 `confirmed` solo incluye `REVISADO` (comparable con el libro registro);
 `provisional` es el resto, excluido `NO_FACTURA`. La definición fiscal definitiva
-está pendiente de validación. Mientras tanto, `aeatStatus` es un valor **mockeado**
-en `PORTAL_USERS.AEAT_ESTADO`: no se deriva de `FACTURAS` ni de `CLIENTS_REGISTRY`.
+está pendiente de validación.
+
+Cálculo aproximado aplicado hasta que Daniel lo confirme: se filtran las facturas
+autorizadas del trimestre actual, se excluye `NO_FACTURA`, y se separan en
+`confirmed` (`REVISADO`) y `provisional` (resto). Los importes salen de
+`BASE_IMPONIBLE`, `CUOTA_IVA` e `IMPORTE_RETENCION_IRPF`; si una factura no trae
+base (habitual en tickets) se calcula como total − IVA + IRPF. Todo el IVA
+soportado se trata como deducible: no se aplican prorrata, gastos no deducibles
+ni regímenes especiales. No se devuelve una “deducción estimada” única: usa
+`deductibleVat` o `vatBalance` hasta cerrar la fórmula.
 
 ---
 
@@ -477,8 +520,6 @@ enum UserRole { cliente, gestor, unknown }
 
 enum ClientStatus { activo, semiactivo, inactivo, unknown }
 
-enum AeatStatus { conectado, noConectado, pendiente, unknown }
-
 class PortalClient {
   const PortalClient({
     required this.nif,
@@ -508,7 +549,6 @@ class PortalProfile {
     required this.role,
     required this.client,
     required this.managerEmail,
-    required this.aeatStatus,
     required this.memberSince,
     required this.lastLoginAt,
   });
@@ -517,7 +557,6 @@ class PortalProfile {
   final UserRole role;
   final PortalClient client;
   final String managerEmail;
-  final AeatStatus aeatStatus;
   final String memberSince;
   final String lastLoginAt;
 
@@ -529,7 +568,6 @@ class PortalProfile {
         json['client'] as Map<String, dynamic>? ?? const {},
       ),
       managerEmail: json['managerEmail'] as String? ?? '',
-      aeatStatus: enumFromApi(AeatStatus.values, json['aeatStatus'], AeatStatus.unknown),
       memberSince: json['memberSince'] as String? ?? '',
       lastLoginAt: json['lastLoginAt'] as String? ?? '',
     );
@@ -573,8 +611,9 @@ class PingResult {
 
 ## 7. Modelos Dart de facturas (Fase 2) y previstos (Fases 3–4)
 
-Los modelos de consulta y de subida de facturas son estables. Los del dashboard
-(Fase 4) siguen siendo borrador.
+Los modelos de consulta y de subida de facturas son estables. La forma del
+dashboard (Fase 4) ya está implementada en la API (§5.6), pero sus modelos en
+Flutter siguen pendientes de la Fase 6.
 
 ```dart
 enum InvoiceType { emitida, recibida, ticket, unknown }
@@ -738,3 +777,28 @@ class UploadStatusResult {
 Cualquier cambio en campos, códigos de error o estados debe actualizar este
 documento y coordinarse con la app Flutter. Los endpoints de fases posteriores se
 cerrarán al implementar cada fase.
+
+- **2026-11-26:** eliminado `aeatStatus` de `getProfile` y `registerClient`
+  (y la columna `PORTAL_USERS.AEAT_ESTADO`). El estado relevante es
+  `client.status`. En Flutter hay que quitar el campo `aeatStatus` de
+  `PortalProfile` y el enum `AeatStatus`.
+
+---
+
+## 10. Herramientas de prueba (solo servidor)
+
+Estas funciones no forman parte del contrato HTTP; se ejecutan desde el editor
+de Apps Script del proyecto API.
+
+- `portalCreateInvitation(options)`: crea una fila en `PORTAL_USERS` con
+  `ESTADO=PENDIENTE`, hash SHA-256 del código, caducidad y datos del
+  `CLIENTS_REGISTRY`. Devuelve `{ inviteCode, email, nif, expiresAt }`.
+  Opciones: `email`, `nif` (obligatorios), `name`, `role`, `gestorEmail`,
+  `ttlHours` y `allowDuplicate`.
+- `portalCreateTestInvitation()`: variante sin argumentos para pruebas
+  repetidas. Lee `PORTAL_TEST_EMAIL`, `PORTAL_TEST_NIF` y, opcionalmente,
+  `PORTAL_TEST_NAME` y `PORTAL_TEST_GESTOR_EMAIL` de las propiedades del script.
+  Imprime el código en **Ver → Logs**.
+
+El código devuelto se envía en `registerClient` como `data.inviteCode` y solo se
+puede consumir una vez.
