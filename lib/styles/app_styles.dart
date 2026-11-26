@@ -11,6 +11,7 @@ class AppStyles {
   /// Neutral Background (60%)
   static const Color backgroundLight = Color(0xFFF5F6FA);
   static const Color backgroundDefault = Color.fromARGB(255, 248, 246, 246);
+  static const Color backgroundError = Color(0xFFFFDAD6);
 
   /// Surfaces & Cards (30%)
   static const Color surfaceWhite = Color(0xFFFFFFFF);
@@ -27,7 +28,7 @@ class AppStyles {
   /// Semantic Colors
   static const Color successColor = Color(0xFF10B981);
   static const Color warningColor = Color(0xFFF59E0B);
-  static const Color errorColor = Color(0xFFEF4444);
+  static const Color errorColor = Color(0xFF93000A);
   static const Color infoColor = Color(0xFF3B82F6);
 
   /// Dividers & Borders
@@ -234,7 +235,7 @@ class AppStyles {
   // ==================== BUTTON STYLES ====================
 
   static const double buttonHeight = 48;
-  static const double buttonBorderRadius = 8;
+  static const double buttonBorderRadius = 2;
   static const double buttonIconSize = 20;
 
   /// Primary Button Style
@@ -277,6 +278,20 @@ class AppStyles {
       ),
     ),
     textStyle: WidgetStatePropertyAll(labelStyle),
+  );
+
+  static const ButtonStyle logOutButtonStyle = ButtonStyle(
+    backgroundColor: WidgetStatePropertyAll(backgroundError),
+    foregroundColor: WidgetStatePropertyAll(errorColor),
+    padding: WidgetStatePropertyAll(
+      EdgeInsets.symmetric(horizontal: spacing24, vertical: spacing12),
+    ),
+    shape: WidgetStatePropertyAll(
+      RoundedRectangleBorder(
+        borderRadius: BorderRadius.all(Radius.circular(buttonBorderRadius)),
+      ),
+    ),
+    textStyle: WidgetStatePropertyAll(buttonTextStyle),
   );
 
   // ==================== CARD STYLES ====================
