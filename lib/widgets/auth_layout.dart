@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 
 import '../styles/app_styles.dart';
 
-/// Layout compartido por las pantallas de acceso (login y activar cuenta):
-/// logo, título, subtítulo, tarjeta blanca con el contenido y pie de seguridad.
 class AuthLayout extends StatelessWidget {
   const AuthLayout({super.key, required this.child});
 

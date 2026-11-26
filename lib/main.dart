@@ -8,7 +8,9 @@ void main() {
     debugPrint = (message, {wrapWidth}) => {};
   } else {
     debugPrint = (message, {wrapWidth}) {
-      final lines = '$message'.split('\n').map((line) => '[Receptari] $line');
+      final lines = '$message'
+          .split('\n')
+          .map((line) => '[Portal-cliente] $line');
       debugPrintThrottled(lines.join('\n'), wrapWidth: wrapWidth);
     };
   }

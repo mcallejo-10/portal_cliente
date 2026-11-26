@@ -35,7 +35,6 @@ class PortalProfile {
     required this.role,
     required this.client,
     required this.managerEmail,
-    required this.aeatStatus,
     required this.memberSince,
     required this.lastLoginAt,
   });
@@ -44,7 +43,6 @@ class PortalProfile {
   final UserRole role;
   final PortalClient client;
   final String managerEmail;
-  final AeatStatus aeatStatus;
   final String memberSince;
   final String lastLoginAt;
 
@@ -56,7 +54,6 @@ class PortalProfile {
         json['client'] as Map<String, dynamic>? ?? const {},
       ),
       managerEmail: json['managerEmail'] as String? ?? '',
-      aeatStatus: enumFromApi(AeatStatus.values, json['aeatStatus'], AeatStatus.unknown),
       memberSince: json['memberSince'] as String? ?? '',
       lastLoginAt: json['lastLoginAt'] as String? ?? '',
     );
